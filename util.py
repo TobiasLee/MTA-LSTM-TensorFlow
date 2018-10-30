@@ -47,15 +47,14 @@ def translate_pairs(topic_list, target_list, generated_list, word2idx):
     return ret
 
 
+
+def load_npy(data_config):
+    ret = []
+    # print(data_config)
+    for item in data_config:
+        # print(item)
+        ret.append(np.load(item))
+    return ret
+
 if __name__ == '__main__':
-    word2idx = np.load("./data_zhihu/correct_data/word_dict_zhihu.npy").item()
-    print(word2idx["<PAD>"])
-    # turn label to one-hot for classifier
-    # num_class = 101
-    test_lbl = np.load("./data_zhihu/correct_data/test_src.npy")
-    print(test_lbl)
-    # oh_lbl = np.zeros((len(test_lbl), num_class))
-    #
-    # for i in range(len(test_lbl)):
-    #     oh_lbl[i][test_lbl[i]] += 1
-    # np.save("test_src_lbl_oh.npy", oh_lbl)
+    pass 

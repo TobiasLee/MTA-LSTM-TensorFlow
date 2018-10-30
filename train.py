@@ -1,8 +1,8 @@
-from generator_tav import TAV
+from tav import TAV
 import tensorflow as tf
 from config import Config
 from dataloader import *
-from generator_tat import TAT
+from tat import TAT
 import numpy as np
 import os
 

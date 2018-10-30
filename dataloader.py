@@ -47,12 +47,3 @@ class GenDataLoader(object):
 
     def reset_pointer(self):
         self.g_pointer = 0
-
-
-def load_npy(data_config):
-    ret = []
-    # print(data_config)
-    for item in data_config:
-        # print(item)
-        ret.append(np.load(item))
-    return ret

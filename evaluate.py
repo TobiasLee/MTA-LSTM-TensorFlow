@@ -3,9 +3,9 @@ import tensorflow as tf
 import numpy as np
 from dataloader import GenDataLoader
 from util import *
-from generator_tat import TAT
-from generator_tav import TAV
-from train_baseline import load_npy
+from tat import TAT
+from tav import TAV
+from util import load_npy
 
 
 if __name__ == '__main__':
