@@ -15,12 +15,16 @@ In this repo, all three models in the paper are implemented in TensorFlow. And t
 
 ## Implementation Notes
 1. TAV-LSTM: feed topic embedding average to a forward network to obtain initial state of decoder.
-2. TAT-LSTM: at each time, compute attention on the topic embedding using Bahdanau Attention, and concat with input to the decoder.
+2. TAT-LSTM: at each time step, compute attention on the topic embedding using Bahdanau Attention, and concat with input to the decoder.
 3. MTA-LSTM: maintain a **coverage vector** to record the whether topic information has been expressed during the training.
+
+**Note**: beam search used in the origin repo is **NOT SUPPORTED**.
+
+You can refer to the code for more details. If you meet any problems, feel free to raise a issue. 
 
 For the data preprocessing, you may refer to the origin paper and process your own data.
  
-You can refer to the code for more details. If you meet any problems, feel free to raise a issue. 
+
 
 ## Generated Examples
 *TODO* : show some generated examples of three models (in Chinese):
