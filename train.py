@@ -25,7 +25,6 @@ if __name__ == '__main__':
     config_g["vocab_dict"] = vocab_dict
     config_g["pretrain_wv"] = np.load("./data_zhihu/correct_data/wv_tencent.npy")
     assert config_g["embedding_size"] == config_g["pretrain_wv"].shape[1]
-    # print(max(vocab_dict.values()))
     G = TAT(config_g)  # train TAT
     G.build_placeholder()
     G.build_graph()
@@ -40,12 +39,8 @@ if __name__ == '__main__':
     saver_g = tf.train.Saver()
     g_pre_dataloader.create_batch()
     sess.run(tf.global_variables_initializer())
-    # print("loading pretrain generator")
-    # path = tf.train.latest_checkpoint(training_config["generator_path"])
-    # G.restore(sess, saver_g, path)
 
     total_step = 0
-    # best_bleu = 0.0
     print("Start training generator")
     for e in range(1, training_config["baseline_epoch"] + 1):
         avg_loss = 0
@@ -54,7 +49,6 @@ if __name__ == '__main__':
             batch = g_pre_dataloader.next_batch()
             pre_g_loss = G.run_pretrain_step(sess, batch)
             avg_loss += pre_g_loss
-            # print(pre_g_loss)
         log_data = "epoch: %d  average training loss: %.4f" % (e, avg_loss / g_pre_dataloader.num_batch)
         print(log_data)
         with open(log_file, "a+") as f:
