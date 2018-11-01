@@ -57,7 +57,7 @@ class TopicAttentionWrapper(RNNCell):
 
 
 class MTAWrapper(RNNCell):
-    def __init__(self, cell, memory, mask=None, max_len=100, attention_size=128, state_is_tuple=True
+    def __init__(self, cell, memory, v, uf, query_layer, memory_layer, mask=None, max_len=100, attention_size=128, state_is_tuple=True
                  ):
         """ Multi-Topic aware wrapper of LSTM
 
@@ -85,11 +85,16 @@ class MTAWrapper(RNNCell):
         else:
             self.seq_len = math_ops.reduce_sum(mask, axis=1, keepdims=True)  # training
 
-        self.u_f = vs.get_variable("u_f", [self.num_keywords * self.embedding_size, self.num_keywords])
+        self.v = v
+        self.query_layer = query_layer
+
+        self.memory_layer = memory_layer
+        self.u_f = uf
         res1 = tf.sigmoid(
             tf.matmul(tf.reshape(self.memory, [self.batch_size, -1]), self.u_f))  # batch_size x num_keyword
         self.phi_res = self.seq_len * res1  # batch_size x num_keywords
 
+        print(self.u_f)
     @property
     def state_size(self):
         return self._cell.state_size
@@ -105,13 +110,11 @@ class MTAWrapper(RNNCell):
         dtype = inputs.dtype
 
         with vs.variable_scope("topic_attention"):
-            v = vs.get_variable("attention_v", [self.attention_size], dtype=dtype)
-            query_layer = layers_core.Dense(self.attention_size, dtype=dtype)
-            memory_layer = layers_core.Dense(self.attention_size, dtype=dtype)
+
             # Attention
-            keys = memory_layer(self.memory)  # batch_size x num x attention_size
-            processed_query = array_ops.expand_dims(query_layer(h_t), 1)  # batch_size, 1 , attention_size
-            score = self.coverage_vector * math_ops.reduce_sum(v * math_ops.tanh(keys + processed_query), [2])
+            keys = self.memory_layer(self.memory)  # batch_size x num x attention_size
+            processed_query = array_ops.expand_dims(self.query_layer(h_t), 1)  # batch_size, 1 , attention_size
+            score = self.coverage_vector * math_ops.reduce_sum(self.v * math_ops.tanh(keys + processed_query), [2])
             score = nn_ops.softmax(score, axis=1)  # softmax
             score_tile = gen_array_ops.tile(array_ops.expand_dims(score, -1), [1, 1, self.embedding_size],
                                             name="weight")

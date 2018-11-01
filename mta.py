@@ -4,7 +4,7 @@ from config import Config
 from util import *
 from tensorflow.nn.rnn_cell import LSTMStateTuple
 from collections import defaultdict
-from topic_wrapper import TopicAttentionWrapper, MTAWrapper
+from topic_wrapper import MTAWrapper
 
 
 class MTA:
@@ -34,6 +34,7 @@ class MTA:
         self.pretrain_wv = config["pretrain_wv"]
         self.beam_width = config["beam_width"]
         self.mem_num = config["mem_num"]
+        self.attention_size = config["attention_size"]
         self.refers = None
         self.rand_uni_init = tf.random_uniform_initializer(-self.norm_init, self.norm_init,
                                                            seed=123)
@@ -77,11 +78,16 @@ class MTA:
                     return cell
 
                 # single layer
-
-                self.initial_state = LSTMStateTuple(c=topic_state, h=topic_state)
                 self.decoder_cell = _get_cell(self.hidden_size)
+                self.initial_state = self.decoder_cell.zero_state(batch_size=self.batch_size, dtype=tf.float32)
+
                 self.decoder_input_embedded = tf.nn.embedding_lookup(self.embedding, self.target_input)
                 self.output_layer = layers_core.Dense(self.vocab_size, use_bias=False)
+
+                self.v = tf.get_variable("attention_v", [self.attention_size])
+                self.query_layer = tf.layers.Dense(self.attention_size)
+                self.memory_layer = tf.layers.Dense(self.attention_size)
+                self.uf = tf.get_variable("u_f", [self.topic_num * self.embedding_size, self.topic_num])
 
                 # pre-train with targets #
                 helper_pt = tf.contrib.seq2seq.TrainingHelper(
@@ -92,7 +98,8 @@ class MTA:
                 masks = tf.sequence_mask(lengths=self.target_len,
                                          maxlen=self.max_len, dtype=tf.float32, name='masks')
                 print(masks)
-                training_cell = MTAWrapper(self.decoder_cell, topic_embedded, mask=masks)
+                training_cell = MTAWrapper(self.decoder_cell, topic_embedded,
+                                           self.v, self.uf, self.query_layer, self.memory_layer, mask=masks)
 
                 decoder_pt = tf.contrib.seq2seq.BasicDecoder(
                     cell=training_cell,
@@ -139,7 +146,9 @@ class MTA:
                 tf.fill([self.batch_size], self.vocab_dict['<GO>']),
                 end_token=self.vocab_dict['<EOS>']
             )
-            infer_cell = MTAWrapper(self.decoder_cell, topic_embedded, max_len=self.max_len)
+            infer_cell = MTAWrapper(self.decoder_cell, topic_embedded,
+                                       self.v, self.uf, self.query_layer, self.memory_layer, mask=masks)
+
             decoder_i = tf.contrib.seq2seq.BasicDecoder(
                 cell=infer_cell,
                 helper=helper_i,

@@ -4,7 +4,7 @@ from config import Config
 from util import *
 from tensorflow.nn.rnn_cell import LSTMStateTuple
 from collections import defaultdict
-from topic_wrapper import TopicAttentionWrapper, MTAWrapper
+from topic_wrapper import TopicAttentionWrapper
 
 
 class TAT:
@@ -61,10 +61,7 @@ class TAT:
                                                  trainable=True, initializer=tf.constant_initializer(self.pretrain_wv))
             with tf.variable_scope("encoder"):
                 topic_embedded = tf.nn.embedding_lookup(self.embedding, self.topic_input)
-                # encode topic to representation
-                topic_average = tf.reduce_mean(topic_embedded, axis=1)
-                topic_state = tf.layers.dense(topic_average, self.hidden_size)
-
+                
             with tf.variable_scope("decoder"):
                 def _get_cell(_num_units):
                     cell = tf.contrib.rnn.BasicLSTMCell(_num_units)
@@ -78,8 +75,9 @@ class TAT:
 
                 # single layer
 
-                self.initial_state = LSTMStateTuple(c=topic_state, h=topic_state)
                 self.decoder_cell = _get_cell(self.hidden_size)
+                self.initial_state = self.decoder_cell.zero_state(batch_size=self.batch_size,
+                                                                  dtype=tf.float32)
                 self.decoder_input_embedded = tf.nn.embedding_lookup(self.embedding, self.target_input)
                 self.output_layer = layers_core.Dense(self.vocab_size, use_bias=False)
 
@@ -284,15 +282,10 @@ class TAT:
             if len(refers) == 0:
                 raise Exception("Error")
             total_bleu += sentence_bleu(refers, h, weights=(0, 1, 0, 0), smoothing_function=self.sm.method1)
-        # print(multi_refers)
-        # print(len(tw))
-        # print(len(multi_refers.keys()))
-        # print()
         if not get_ret:
             return total_bleu / len(tw) * 100
         else:
             return total_bleu / len(tw) * 100, topic_list, test_target, test_samples
-        # return total_bleu / dataloader.num_batch
 
 
 if __name__ == '__main__':
