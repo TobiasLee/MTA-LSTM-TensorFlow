@@ -2,7 +2,7 @@
 
 TensorFlow implementation of paper [Topic-to-Essay Generation with Neural Networks](http://ir.hit.edu.cn/~xcfeng/xiaocheng%20Feng's%20Homepage_files/final-topic-essay-generation.pdf).
 
-## Motivation: 
+## Motivation
 
 The origin [implementation](https://github.com/hit-computer/MTA-LSTM) only provides the MTA-LSTM model, and the code is out-of-date.
 In this repo, all three models in the paper are implemented in TensorFlow. And the latest TensorFlow seq2seq and RNNWrapper apis are utilized to make the code clean. 
