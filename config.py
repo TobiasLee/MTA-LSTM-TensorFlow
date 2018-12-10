@@ -7,19 +7,10 @@ class Config(object):
     }
 
     train_data_path = [
-        "./data_zhihu/correct_data/train_src.npy",
-        "./data_zhihu/correct_data/train_src_len.npy",
-        "./data_zhihu/correct_data/train_tgt.npy",
-        "./data_zhihu/correct_data/train_tgt_len.npy",
-        "./data_zhihu/correct_data/train_mem_idx_tx_60.npy"
+        # please use your own preprocessed data. 
     ]
     test_data_path = [
-        "./data_zhihu/correct_data/test_src.npy",
-        "./data_zhihu/correct_data/test_src_len.npy",
-        "./data_zhihu/correct_data/test_tgt.npy",
-        "./data_zhihu/correct_data/test_tgt_len.npy",
-        "./data_zhihu/correct_data/test_mem_idx_tx_60.npy"
-
+        # please use your own preprocessed data. 
     ]
 
     generator_config = {
