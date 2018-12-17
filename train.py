@@ -31,8 +31,8 @@ if __name__ == '__main__':
 
 
     # load data
-    si, sl, ti, tl, train_mem = load_npy(Config().train_data_path)
-    g_pre_dataloader = GenDataLoader(config_g["batch_size"], si, sl, ti, tl, max_len=100, memory=train_mem)
+    si, sl, ti, tl = load_npy(Config().train_data_path)
+    g_pre_dataloader = GenDataLoader(config_g["batch_size"], si, sl, ti, tl, max_len=100)
 
     sess = tf.Session(config=tf_config)
 
