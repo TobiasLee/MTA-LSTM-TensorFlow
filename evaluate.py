@@ -26,11 +26,11 @@ if __name__ == '__main__':
     G = TAT(config_g)
     G.build_placeholder()
     G.build_graph()
-
+    
 
     sess = tf.Session(config=tf_config)
     saver = tf.train.Saver()
-
+    G.restore(sess, saver, path=config_g["model_path"]) # you may define you own model path in the config.py
     path = tf.train.latest_checkpoint(training_config["tat_path"])
     print(path)
     sess.run(tf.global_variables_initializer())
