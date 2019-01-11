@@ -237,56 +237,13 @@ class SCLSTM_Model:
         save_path = saver.save(sess, save_path=path, global_step=global_step)
         print("model saved at %s" % save_path)
 
-    def evaluate(self, sess, dataloader, idx2word, get_ret=False):
-        print("evaluating ...")
-        dataloader.reset_pointer()
-        test_samples = []
-        test_target = []
-        topic_list = []
-        total_bleu = 0
-        for t_n in range(dataloader.num_batch):
-            da, target_input, target_len, topic_idx = dataloader.next_batch()
-            # samples, beam_samples = self.evaluate_bleu(sess, topic_idx, topic_len, memory=test_mem)
-            # best_beams = beam_samples[:,:, 0]
 
-            samples = self.evaluate_bleu(sess, da)
-
-            test_samples.extend(samples)
-            test_target.extend(target_input)
-            topic_list.extend(topic_idx)
-            # test_bleu, max_bleu, best_ret, best_target = calc_bleu2(test_samples, test_target)
-            # total_bleu += test_bleu
-        # build a list
-        tp = [sorted(x) for x in topic_list]  # sort topic word
-        tw = list(map(lambda x: "".join([idx2word[w] for w in x]), tp))
-        if self.refers is None:
-            print("building refers ....")
-            multi_refers = defaultdict(list)
-
-            for w, r in zip(tw, test_target):
-                multi_refers[w].append(r)
-            self.refers = multi_refers
-
-        for w, h in zip(tw, test_samples):
-            refers = self.refers[w]
-            if len(refers) == 0:
-                raise Exception("Error")
-            total_bleu += sentence_bleu(refers, h, weights=(0, 1, 0, 0), smoothing_function=self.sm.method1)
-        # print(multi_refers)
-        # print(len(tw))
-        # print(len(multi_refers.keys()))
-        # print()
-        if not get_ret:
-            return total_bleu / len(tw) * 100
-        else:
-            return total_bleu / len(tw) * 100, topic_list, test_target, test_samples
-        # return total_bleu / dataloader.num_batch
 
 
 if __name__ == '__main__':
     config = Config().generator_config
-    config["vocab_dict"] = np.load("./data_zhihu/correct_data/word_dict_zhihu.npy").item()
-    config["pretrain_wv"] = np.load("./data_zhihu/correct_data/wv_tencent.npy")
+    config["vocab_dict"] = np.load("path_to_vocab_dict").item()
+    config["pretrain_wv"] = np.load("path_to_pretrain_wv")
     G = SCLSTM_Model(config)
     G.build_placeholder()
     G.build_graph()
